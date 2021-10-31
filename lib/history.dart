@@ -59,6 +59,7 @@ class IdmHistory extends StatelessWidget {
                             "Карта",
                             style: TextStyle(color: Colors.white),
                           ),
+                          SizedBox(width: 5),
                         ],
                       ),
                     ),
@@ -67,7 +68,7 @@ class IdmHistory extends StatelessWidget {
                         MaterialPageRoute(
                             builder: (context) => Scaffold(
                                   body: CusMap(
-                                    points: data.getLatLng(),
+                                    data: data,
                                     cam: CameraPosition(target: e.pos),
                                   ),
                                   appBar: AppBar(title: Text("Просмотр точки")),

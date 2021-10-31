@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:idm_phone/data.dart';
 
 import 'dart:async';
 import 'dart:math';
+
+import 'package:idm_phone/point.dart';
 
 class IcePolygon {
   final List<LatLng> points;
@@ -14,12 +17,12 @@ class IcePolygon {
 class CusMap extends StatefulWidget {
   const CusMap({
     Key? key,
-    required this.points,
+    required this.data,
     this.ice,
     this.cam,
   }) : super(key: key);
 
-  final List<LatLng> points;
+  final IdmData data;
   final List<IcePolygon>? ice;
   final CameraPosition? cam;
 
@@ -39,23 +42,53 @@ class _CusMapState extends State<CusMap> {
 
   @override
   void initState() {
-    for (var e in widget.points) {
+    for (var e in widget.data.path) {
       Color color = Colors.blue;
+      Function()? onTap;
 
-      if (widget.cam != null && widget.cam!.target == e) {
+      if (widget.cam != null && widget.cam!.target == e.pos) {
         color = Colors.red;
       }
+
+      onTap = () {
+        showDialog(
+          context: context,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    PointInfo(
+                      point: e,
+                      data: widget.data,
+                      isOnMap: true,
+                    ),
+                  ],
+                )),
+          ),
+        );
+      };
 
       circles.add(
         Circle(
           circleId: CircleId(
-            "circle_${e.latitude.toString()}_${e.longitude.toString()}",
+            "circle_${e.pos.latitude.toString()}_${e.pos.longitude.toString()}",
           ),
-          center: e,
+          center: e.pos,
           radius: 5,
           strokeColor: Colors.white,
           strokeWidth: 1,
           fillColor: color,
+          onTap: onTap,
+          zIndex: 10,
+          consumeTapEvents: true,
         ),
       );
     }
@@ -75,7 +108,7 @@ class _CusMapState extends State<CusMap> {
     }
 
     _kCam = CameraPosition(
-      target: widget.points[0],
+      target: widget.data.path[0].pos,
       zoom: 18,
     );
 
@@ -97,13 +130,13 @@ class _CusMapState extends State<CusMap> {
         GoogleMap(
           polylines: {
             Polyline(
-              points: widget.points,
+              points: widget.data.getLatLng(),
               polylineId: const PolylineId("fill"),
               width: 10,
               color: Colors.white,
             ),
             Polyline(
-              points: widget.points,
+              points: widget.data.getLatLng(),
               polylineId: const PolylineId("stroke"),
               width: 5,
               color: Colors.blue,
@@ -153,6 +186,44 @@ class _CusMapState extends State<CusMap> {
             alignment: const Alignment(0, 0.9),
           ),
         ),
+        if (widget.cam != null)
+          Positioned.fill(
+            child: Align(
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(10)),
+                child: Column(
+                  children: [
+                    const Text(
+                      "Выбрана точка",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
+                    ),
+                    Text(
+                      "Широта: ${widget.cam!.target.latitude.toString()}°",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      "Долгота: ${widget.cam!.target.longitude.toString()}°",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                  mainAxisSize: MainAxisSize.min,
+                ),
+              ),
+              alignment: const Alignment(0, -0.9),
+            ),
+          ),
       ],
     ));
   }

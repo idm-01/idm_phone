@@ -30,7 +30,9 @@ class _MainMenuState extends State<MainMenu> {
         title: const Text("IDM Client"),
       ),
       body: _curI == 0
-          ? CusMap(points: data.getLatLng())
+          ? CusMap(
+              data: data,
+            )
           : Padding(
               padding: EdgeInsets.all(_curI == 0 ? 0 : 20),
               child: (_curI == 1
@@ -39,6 +41,7 @@ class _MainMenuState extends State<MainMenu> {
                     )
                   : PointInfo(
                       isRecent: true,
+                      data: data,
                       point: data.path[data.path.length - 1],
                     )),
             ),
