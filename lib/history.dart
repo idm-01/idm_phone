@@ -84,8 +84,12 @@ class IdmHistory extends StatelessWidget {
       );
     }
 
-    return Column(
-      children: _w,
+    return Scrollbar(
+      child: ListView(
+        children: _w,
+      ),
+      isAlwaysShown: true,
+      radius: Radius.circular(10),
     );
   }
 }
